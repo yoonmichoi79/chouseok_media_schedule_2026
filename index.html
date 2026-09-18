@@ -381,17 +381,22 @@ function matches(d){
   return true;
 }
 
-function statusPillHtml(text, isHoliday){
+function statusPillHtml(text, isHoliday, dim){
   const {main, note} = annotate(text);
   const cat = isHoliday ? 'holiday' : categoryOf(text);
   const color = CAT_COLOR[cat];
-  const emphasize = !isHoliday && (cat==='off' || cat==='short');
-  const style = isHoliday
-    ? ''
-    : emphasize
-      ? `background:var(--${color});color:#fff;`
-      : `background:var(--${color}-soft);color:var(--${color});`;
-  const noteColor = isHoliday ? 'var(--ink-faint)' : (emphasize ? 'rgba(255,255,255,.82)' : 'var(--ink-faint)');
+  const emphasize = !isHoliday && !dim && (cat==='off' || cat==='short');
+  let style;
+  if(isHoliday){
+    style = dim ? 'background:#F1EEE6;' : '';
+  } else if(emphasize){
+    style = `background:var(--${color});color:#fff;`;
+  } else if(dim){
+    style = 'background:#F1EEE6;color:#B7B2A6;';
+  } else {
+    style = `background:var(--${color}-soft);color:var(--${color});`;
+  }
+  const noteColor = dim ? '#C7C2B6' : (isHoliday ? 'var(--ink-faint)' : (emphasize ? 'rgba(255,255,255,.82)' : 'var(--ink-faint)'));
   const noteHtml = note ? `<span class="seg-note" style="color:${noteColor};">${escapeHtml(note)}</span>` : '';
   return `<span class="status-pill ${isHoliday?'holiday':''}" style="${style}">
     <span class="seg-main">${escapeHtml(main)}</span>${noteHtml}
@@ -407,12 +412,13 @@ let noteIdCounter = 0;
 function rowHtml(d){
   const nid = 'note'+(noteIdCounter++);
   const hasNote = (d.note||'').trim().length > 0;
+  const dim = isUnconfirmed(d);
   return `
-    <tr class="${isUnconfirmed(d)?'unconfirmed':''}">
+    <tr class="${dim?'unconfirmed':''}">
       <td class="col-media">${mediaHtml(d)}</td>
-      <td class="col-status">${statusPillHtml(d.d1, false)}</td>
-      <td class="col-status">${statusPillHtml(d.d2 || '연휴', true)}</td>
-      <td class="col-status">${statusPillHtml(d.d3, false)}</td>
+      <td class="col-status">${statusPillHtml(d.d1, false, dim)}</td>
+      <td class="col-status">${statusPillHtml(d.d2 || '연휴', true, dim)}</td>
+      <td class="col-status">${statusPillHtml(d.d3, false, dim)}</td>
       <td class="col-note">
         ${hasNote ? `<div class="note-text" id="${nid}">${escapeHtml(d.note)}</div><span class="note-toggle" onclick="toggleNote('${nid}', this)">더보기</span>` : '<span style="color:var(--line);">–</span>'}
       </td>
@@ -439,6 +445,17 @@ function renderResults(){
     <div class="group-title">${escapeHtml(g.title)} (${g.rows.length})</div>
     <table>${tableHead}<tbody>${g.rows.map(rowHtml).join('')}</tbody></table>
   `).join('');
+  updateNoteToggles();
+}
+
+/* 비고 텍스트가 2줄 안에 다 들어가면 '더보기'를 숨기고, 실제로 잘릴 때만 보여줍니다 */
+function updateNoteToggles(){
+  document.querySelectorAll('.note-text').forEach(el=>{
+    const toggle = el.nextElementSibling;
+    if(!toggle || !toggle.classList.contains('note-toggle')) return;
+    const overflowing = el.scrollHeight > el.clientHeight + 1;
+    toggle.style.display = overflowing ? '' : 'none';
+  });
 }
 
 function renderAll(){ renderStats(); renderChips(); renderResults(); }
