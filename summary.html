@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>추석 연휴 매체별 업무일정 안내 (메일용)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap">
+<style>
+  :root{
+    --ink:#1B2340; --ink-soft:#4B5468; --ink-faint:#8A93A6;
+    --line:#DEE1DA; --moon:#E8B44D;
+    --persimmon:#C0503B; --persimmon-soft:#F5DCD4;
+    --gold:#A9791B; --gold-soft:#F1E6C8;
+    --pine:#3F7D57;
+    --serif:'Nanum Gothic',sans-serif;
+    --sans:'Nanum Gothic',-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:transparent;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.5;}
+  .wrap{max-width:680px;margin:0 auto;padding:24px 20px 60px;}
+
+  .subject-box{background:#fff;border:1px dashed var(--line);border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .subject-box .lbl{font-size:11px;color:var(--ink-faint);font-weight:700;letter-spacing:.03em;margin-bottom:3px;}
+  .subject-box .txt{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .copy-btn{font-family:var(--sans);font-size:12px;padding:6px 12px;border-radius:16px;border:1px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;white-space:nowrap;}
+  .copy-btn:hover{background:var(--ink);color:#fff;}
+  .toolbar-row{display:flex;justify-content:flex-end;margin-bottom:20px;}
+  .copy-btn.primary{background:var(--ink);color:#fff;}
+  .copy-btn.primary:hover{background:#2A3557;}
+
+  #emailArea{max-width:640px;width:100%;margin:0;}
+
+  /* ---------- Chuseok banner (전체 페이지와 동일 톤) ---------- */
+  .chuseok-banner{position:relative;overflow:hidden;border-radius:14px;margin:0 0 24px;
+    background-color:#232A52;background-image:linear-gradient(160deg,#171B37 0%,#232A52 55%,#2B3565 100%);}
+  .banner-inner{position:relative;z-index:3;padding:26px 24px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .banner-moon{position:absolute;top:-34px;right:-22px;width:130px;height:130px;border-radius:50%;
+    background-color:var(--moon);
+    background-image:radial-gradient(circle at 36% 32%,#FEF7D9,var(--moon) 55%,#C98F2E 100%);z-index:1;}
+  .banner-persimmon{position:absolute;top:4px;right:10px;width:108px;height:auto;z-index:2;opacity:.96;}
+  .banner-pine{position:absolute;bottom:-4px;left:-8px;width:70px;height:auto;z-index:2;opacity:.9;}
+  .banner-eyebrow{font-size:11px;color:#B9C0E0;margin-bottom:6px;letter-spacing:.02em;}
+  .banner-title{font-weight:800;font-size:19px;color:#FCEFC8;margin:0 0 6px;letter-spacing:-.01em;line-height:1.35;}
+  .banner-sub{font-size:12.5px;color:#C7CDEA;margin:0;line-height:1.6;white-space:nowrap;}
+  .banner-dday{flex:0 0 auto;width:62px;height:62px;border-radius:50%;
+    background-color:var(--moon);
+    background-image:radial-gradient(circle at 34% 30%,#FEF7D9,var(--moon) 60%,#C98F2E 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;color:#221807;}
+  .banner-dday .dday-num{font-weight:800;font-size:15px;line-height:1;}
+  .banner-dday .dday-lbl{font-size:7.5px;font-weight:700;margin-top:2px;letter-spacing:.02em;}
+
+  .headline{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:24px;}
+  .headline .eyebrow{font-size:12px;color:var(--ink-faint);margin-bottom:8px;}
+  .headline h1{font-weight:800;font-size:22px;margin:0 0 8px;letter-spacing:-.01em;}
+  .headline p{font-size:13.5px;color:var(--ink-soft);margin:0;}
+  .stat-inline{display:inline-block;background:var(--persimmon-soft);color:var(--persimmon);font-weight:700;padding:1px 7px;border-radius:4px;margin:0 2px;}
+
+  .section{margin-bottom:32px;}
+  .section h2{font-size:16px;font-weight:800;margin:0 0 4px;}
+  .section-sub{font-size:12px;color:var(--ink-soft);margin:0 0 14px;}
+
+  .card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .card{background:var(--persimmon-soft);border-left:3px solid var(--persimmon);border-radius:8px;padding:10px 12px;}
+  .card .media{font-weight:700;font-size:12.5px;margin-bottom:5px;}
+  .card .media .paren{font-weight:400;color:var(--ink-faint);font-size:11px;}
+  .card .pill{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:9px;background:var(--persimmon);color:#fff;}
+  .empty-note{font-size:12px;color:var(--ink-faint);padding:14px;background:#FBFBFA;border:1px dashed var(--line);border-radius:8px;text-align:center;}
+
+  .status-line{font-size:12px;color:var(--ink-faint);text-align:center;padding:30px 0;}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:9px 16px;border-radius:18px;opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:99;}
+  .toast.show{opacity:1;}
+
+  @media(max-width:600px){ .card-grid{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:420px){ .card-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="subject-box">
+    <div><div class="lbl">📬 추천 메일 제목</div><div class="txt" id="subjectText">[미디어전략팀] 2026년 추석 연휴 매체별 업무일정 안내</div></div>
+    <button class="copy-btn" id="copySubject">제목 복사</button>
+  </div>
+  <div class="toolbar-row">
+    <button class="copy-btn primary" id="selectAllBtn">본문 전체 선택</button>
+  </div>
+
+  <div id="emailArea">
+    <div class="chuseok-banner">
+      <div class="banner-moon"></div>
+      <svg class="banner-persimmon" viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 8 Q60 -2 132 22" stroke="#7A5233" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="38" cy="6" rx="15" ry="8" fill="#4A6B3A" transform="rotate(-20 38 6)"/>
+        <ellipse cx="88" cy="16" rx="15" ry="8" fill="#4A6B3A" transform="rotate(15 88 16)"/>
+        <circle cx="33" cy="28" r="11" fill="#E8703A"/>
+        <circle cx="63" cy="38" r="13" fill="#D9542F"/>
+        <circle cx="93" cy="30" r="10" fill="#E8703A"/>
+        <path d="M33 20v8M63 28v8M93 22v8" stroke="#4A6B3A" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <svg class="banner-pine" viewBox="0 0 80 70" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="18" fill="#2F4A3A"/>
+        <circle cx="45" cy="15" r="14" fill="#3C5C48"/>
+        <circle cx="30" cy="38" r="16" fill="#35513F"/>
+        <rect x="26" y="45" width="6" height="20" fill="#5C4326"/>
+      </svg>
+      <div class="banner-inner">
+        <div class="banner-dday"><span class="dday-num" id="ddayNumEmail">D-5</span><span class="dday-lbl">연휴까지</span></div>
+        <div>
+          <div class="banner-eyebrow">미디어전략실 · 사내 공유</div>
+          <div class="banner-title">🌕 추석 연휴 매체별 업무일정 안내</div>
+          <p class="banner-sub" id="subHeadline">불러오는 중…</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="content">
+      <div class="status-line">구글시트에서 최신 데이터를 불러오는 중입니다…</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<script>
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1qy0CDy-NiMFti5Q6rOpddYk37L0duAq_7w0iv5Dj-qk/gviz/tq?tqx=out:csv&gid=418471814';
+const FULL_PAGE_URL = 'https://yoonmichoi79.github.io/chouseok_media_schedule_2026/';
+const HOLIDAY_START = new Date(2026,8,23);
+
+const DEFAULT_DATA = [
+{group:'미디어렙사', media:'나스미디어 (nap dsp 포함)', d1:'단축근무 (오후3시까지)', d2:'연휴', d3:'정상근무', note:'* 9/23(수) 오후 3시 이후 자율퇴근'},
+{group:'미디어렙사', media:'메조미디어 (타겟픽)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'※ 9/23(수) 오전까지 업무 요청 부탁드립니다.'},
+
+{group:'포털', media:'네이버DA', d1:'단축근무 (~12시)', d2:'연휴', d3:'정상근무', note:'[9/23(수) 연휴 전일 업무]\n1. 검수: 검색광고 오후 3시 접수분까지 처리, 성과형/보장형(브랜드검색 포함) 오후 12시 접수분까지 처리\n2. CS/파트너사지원: 오후 5시 접수분까지 처리\n3. 신용카드 검수: 오후 12시 접수분까지 처리'},
+{group:'포털', media:'네이버SA (네이버_그린웹서비스)', d1:'단축근무 (~15시)', d2:'연휴', d3:'정상근무', note:''},
+{group:'포털', media:'네이버 쇼핑광고 (쇼핑블록, 모바일광고)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'1. 대상광고: PC 쇼핑블록(쇼핑/멘즈), 모바일 쇼핑블록(트렌드Pick 등)\n2. 소재검수 미진행 일정 사전 확인 필요\n3. 연휴 기간 내 노출 소재는 사전에 소재검수 등록 요망 (등록 마감 오후 5시)\n4. 소재 교체 필요 시 자동검수 기능 활용 권장. 입찰/구매 광고비 차감은 정상 진행'},
+{group:'포털', media:'카카오', d1:'오전근무 ※담당자별 근무시간 상이', d2:'연휴', d3:'정상근무', note:'* 고객센터/광고심사/문의게시판: 9/23(수) 정상 운영, 9/24~9/25 미운영\n* 일반 소재 심사: 영업일 기준 2일 이내(키워드광고 3일 이내), 휴무일 심사 미진행\n* 성과형 광고(비즈보드·디스플레이·동영상) 심사: 휴무일에도 08:00~24:00 운영\n* 대행사 컨설팅부서: 9/23(수) 오전근무만 진행\n- ASAP·성장지원 등 무상캐시 지급 요청은 9/22(화)까지 권장\n- 기타 요청사항도 가급적 9/22(화)까지 접수 권장'},
+{group:'포털', media:'구글', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'* 광고지원팀: 연휴 기간 채팅/전화 지원 중단, 이메일 접수는 가능하나 처리는 연휴 이후 순차 처리\n* 광고검수팀: 시스템 검수는 정상 운영. 이의신청 필요시 연휴 이후 순차 처리 예상되므로 캠페인 시작일 기준 최소 48시간 전 소재 업로드 권장\n* 연휴 전후 휴가 사용자가 많을 수 있어 여유있게 검수 요청 권장'},
+
+{group:'네트워크DA·버티컬', media:'메타 (페이스북, 인스타그램)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'* 메타 고객센터(문의하기)는 공휴일 상관없이 연중무휴 24시간 운영'},
+{group:'네트워크DA·버티컬', media:'애플 (Apple Ads)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'* 담당자별 개별 휴가 기간이 다르므로 지정담당자 휴무여부 개별 확인 요망'},
+{group:'네트워크DA·버티컬', media:'크리테오', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'모비온', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'RTB하우스', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'몰로코', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'애피어', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'알레프 (X, MS 등)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'OpenAI', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'* 담당자 9/11~9/29 개별 휴가로, 해당 기간 ads-korea@openai.com 또는 ads-support@openai.com 로 문의'},
+{group:'네트워크DA·버티컬', media:'트레이딩웍스 (트레이딩웍스, 애드팝콘)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'* 당일 단축근무로 변동될 수 있음'},
+{group:'네트워크DA·버티컬', media:'모티브인텔리전스 (크로스타겟)', d1:'단축근무 (~12시)', d2:'연휴', d3:'정상근무', note:'미확인(확인필요)'},
+{group:'네트워크DA·버티컬', media:'아티스트컴퍼니 (타겟팅게이츠)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'레인보우8 (ADN)', d1:'단축근무 (~12시)', d2:'연휴', d3:'정상근무', note:'* 23일(수) 전사 오전 근무 시행'},
+{group:'네트워크DA·버티컬', media:'에이스트레이더', d1:'휴무', d2:'연휴', d3:'정상근무', note:'* 9/23(수) NHN 전사 창립기념일 대체 휴무일'},
+{group:'네트워크DA·버티컬', media:'데이블', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'법정 공휴일 기준 휴무 예정'},
+{group:'네트워크DA·버티컬', media:'데이블_웨어즈DSP', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'법정 공휴일 기준 휴무 예정'},
+{group:'네트워크DA·버티컬', media:'타불라', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'NBT (캐시슬라이드, 쿠키오븐 등)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'네이버페이/쿠키오븐 주요 매체사 휴무 일정에 따라 처리 가능 여부 결정\n* 쿠키오븐: 9/23(수) 정상근무\n* 네이버페이 파이낸셜: 9/23(수) 단축근무(당일 12시 접수건까지), 9/28(월) 휴무(창립기념일)\n* 네이버페이 그린웹: 9/23(수) 단축근무(당일 12시 접수내역까지)'},
+{group:'네트워크DA·버티컬', media:'버즈빌', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'12pm까지 소재 및 업무 요청 요망'},
+{group:'네트워크DA·버티컬', media:'EMCG', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'FSN (카울리)', d1:'단축근무 (~15시)', d2:'연휴', d3:'정상근무', note:'* 신규 제안/집행 캠페인 업무 요청: 9/23 오후 1시 이전까지 전달\n(오후 3시 이내 미처리 건은 9/28(월) 순차 진행)'},
+{group:'네트워크DA·버티컬', media:'당근 (전문가모드)', d1:'휴무 (오전까지 소재 검수 권장)', d2:'연휴', d3:'정상근무', note:'[연휴 기간 중 소재 검수 안내]\n연휴 기간에도 소재 검수는 진행(고객센터는 휴무)되나 평소보다 시간이 소요될 수 있음\n연휴 전후 검수 요청 집중 예상 → 1~2일 여유있게 요청 권장\n라이브 필요한 캠페인은 늦어도 9/23(수) 오전까지 검수 접수 요망'},
+{group:'네트워크DA·버티컬', media:'토스애즈 (DA)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'틱톡', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'네이버페이', d1:'단축근무 (~12시)', d2:'연휴', d3:'휴무 (창립기념일)', note:'* 9/23(수) 오전 단축근무: 소재 세팅/검수 필요시 오전 12시 이전까지 전달\n* 9/28(월) 창립기념일 휴무: 리포트/운영/소재 검수·세팅은 그린웹을 통해 지원'},
+{group:'네트워크DA·버티컬', media:'카카오페이', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'연휴 중 라이브 필요시 9/23 소재 승인 및 세팅 완료 건에 한해 라이브 가능'},
+{group:'네트워크DA·버티컬', media:'TNK팩토리 (아이돌챔프, 셀럽챔프, 팬버스, TOSS오늘의포인트미션)', d1:'정상근무 (당일요청건 16시까지)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'디지털캠프', d1:'오전근무 (09:00~13:00)', d2:'연휴', d3:'정상근무', note:'업무 시간 외 요청 건은 다음 영업일 순차 처리, ASAP 건 사전 공유 요망\n팀메일(mkt@digitalcamp.co.kr) 참조 부탁드립니다.'},
+{group:'네트워크DA·버티컬', media:'인크로스', d1:'전사휴무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'텐핑', d1:'단축근무 (~12시)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'우아한형제들 (배달의민족, 배민애즈)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'법정 휴일 외 특이사항 없음'},
+{group:'네트워크DA·버티컬', media:'열품타', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'법정 휴일 외 특이사항 없음'},
+{group:'네트워크DA·버티컬', media:'키즈노트', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'9/23(수) 오전 근무로 단순 문의/제안만 가능\n9/28(월) 주 캠페인 소재 전달 데드라인: 9/21(월) 오후 3시(교체/라이브 동일)'},
+{group:'네트워크DA·버티컬', media:'라이프엑스 (마미톡)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'9/24~9/27 기간, 담당자 1인이 오전/오후 캠페인 모니터링 및 실시간 업무 지원 예정'},
+{group:'네트워크DA·버티컬', media:'바나나몽키즈 (딜링)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'쿠팡애즈 (브랜드애드)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'컬리 (개인화광고)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'코비 (COVI)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'카카오뱅크', d1:'단축근무 (9/22까지 소재등록 요망)', d2:'연휴', d3:'정상근무', note:'9/23 단축근무로 소재 검수 어려울 수 있어 9/22까지 소재 등록 부탁\n일반업종 3영업일 전, 금융업종 5영업일 전 소재 등록 필요'},
+{group:'네트워크DA·버티컬', media:'카카오VX', d1:'정상근무 (오후 단축근무 가능성 有)', d2:'연휴', d3:'정상근무', note:'가능한 9/22(화)까지 소재 전달 부탁 (급건 시 협의 가능)\n박성준 Simon (simon.psj@kakaovx.com), 팀메일(_advx@kakaovx.com, 언더바 포함) 꼭 참조'},
+{group:'네트워크DA·버티컬', media:'골프존', d1:'오전근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'에이아이썸 (Aisum)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'아파트너', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'연휴 중 긴급 건은 김만종 010-9950-8773'},
+{group:'네트워크DA·버티컬', media:'비누랩스 (에브리타임)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'클래스팅', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'레몬트리 (퍼핀)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'닥터다이어리', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'캐시워크', d1:'오전근무 (~오후1시까지)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'인벤', d1:'전사휴무', d2:'연휴', d3:'정상근무', note:'필요업무는 9/22(화) 17시까지 전달\n문의/요청은 메일로, 9/28(월) 순차 처리'},
+{group:'네트워크DA·버티컬', media:'숲 (SOOP)', d1:'단축근무 (~16시)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'스포티비 (SPOTV)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'애드포러스 (바리스타, 그린피, 큐브마인)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'9/23(수) 전사 오전 근무 시행'},
+{group:'네트워크DA·버티컬', media:'스테이션3 (다방)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'직방 (직방, 호갱노노)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'에이블리', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'CJ올리브네트웍스 (CJ ONE)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'CJ ENM (TVING, CJ Youtube, 엠넷플러스 및 디지털광고)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'디시인사이드', d1:'오전근무 (12시업무마감)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'리멤버앤컴퍼니 (리멤버)', d1:'단축근무 (~12시)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'인아웃', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'SK플래닛', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'중고나라', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'9/22 오후 5시 이전 요청 → 9/23 오전 중 처리\n9/22 오후 5시 이후 요청 → 9/28 순차 처리'},
+{group:'네트워크DA·버티컬', media:'팀블라인드 (블라인드)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'블라인드 광고 소재 검수 시간 11:00~17:00\n팀메일 ads@teamblind.com 참조 부탁드립니다.'},
+{group:'네트워크DA·버티컬', media:'와이즈버즈', d1:'오전근무 (12시업무마감)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'티맵모빌리티', d1:'권장휴무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'메디게이트', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'이노케어플러스 (닥플)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'하이퍼테크 (핑거버스)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'미디어브릿지컴퍼니', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+
+{group:'CRM', media:'유니드컴즈', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'CRM', media:'데이터라이즈', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'CRM', media:'스냅컴퍼니', d1:'단축근무 (~14:30)', d2:'연휴', d3:'정상근무', note:''},
+
+{group:'DMP', media:'다이티', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'DMP', media:'로플랫', d1:'정상근무 ※담당자별 근무시간 상이', d2:'연휴', d3:'정상근무 ※담당자별 근무시간 상이', note:'개인별 휴가에 따른 근무일정 상이'},
+{group:'DMP', media:'NICE코어 (NICECORE·나이스평가정보)', d1:'휴무', d2:'연휴', d3:'정상근무', note:'휴무기간 동안 DMP·LMS 등 업무 문의 유선연락 가능 (류지남 팀장 / 010-7457-3902)'},
+];
+
+function escapeHtml(s){
+  return (s==null ? '' : String(s))
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function annotate(text){
+  let t = (text||'').trim();
+  let note = '';
+  const pm = /^(.*?)\s*([（(][^）)]*[）)])\s*$/.exec(t);
+  if(pm){ t = pm[1].trim(); note = pm[2]; }
+  const idx = t.indexOf('※');
+  if(idx >= 0){ note = (t.slice(idx).trim() + (note ? ' ' + note : '')).trim(); t = t.slice(0, idx).trim(); }
+  return {main: t || '-', note};
+}
+function categoryOf(text){
+  const t = (text||'').trim();
+  if(t.includes('휴무')) return 'off';
+  if(t.includes('단축') || t.includes('오전')) return 'short';
+  if(t.includes('정상')) return 'normal';
+  return 'other';
+}
+
+let LAST = {off:[], short:[], data:[]};
+
+function offCardHtml(d){
+  const {main, note} = annotate(d.media);
+  const {main: statusMain} = annotate(d.d1);
+  return `
+  <div class="card">
+    <div class="media">${escapeHtml(main)}${note?` <span class="paren">${escapeHtml(note)}</span>`:''}</div>
+    <span class="pill">${escapeHtml(statusMain)}</span>
+  </div>`;
+}
+
+function render(data){
+  LAST.data = data;
+  const off = data.filter(d=>categoryOf(d.d1)==='off');
+  const short = data.filter(d=>categoryOf(d.d1)==='short');
+  LAST.off = off; LAST.short = short;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((HOLIDAY_START - today) / 86400000);
+  document.getElementById('ddayNumEmail').textContent = diff > 0 ? `D-${diff}` : (diff === 0 ? 'D-DAY' : '연휴중');
+
+  document.getElementById('subHeadline').innerHTML =
+    `조사한 전체 <span class="stat-inline">${data.length}개 매체</span> 중, 9/23(수) <span class="stat-inline">휴무 ${off.length}곳</span> · <span class="stat-inline">단축근무 ${short.length}곳</span>이 있습니다.`;
+
+  const offGrid = off.length
+    ? `<div class="card-grid">${off.map(offCardHtml).join('')}</div>`
+    : `<div class="empty-note">9/23(수) 휴무 매체가 없습니다.</div>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="section">
+      <h2>🚨 9/23(수) 휴무 매체 (${off.length}곳)</h2>
+      <div class="section-sub">연휴 전날 업무 자체가 어려운 매체입니다. 급한 요청은 오늘 중 전달해 주세요.</div>
+      ${offGrid}
+    </div>
+    <div class="section">
+      <p style="font-size:13px;color:var(--ink-soft);line-height:1.8;margin:0 0 4px;">
+        그 외 <b>단축근무 ${short.length}곳</b>을 포함해, 조사한 <b>전체 ${data.length}개 매체의 상세 근무일정과 비고</b>는 아래 페이지에서 확인해 주세요.
+      </p>
+    </div>
+    <div class="section">
+      <div style="border-radius:14px;overflow:hidden;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#1B2340" style="border:none;border-collapse:collapse;background-color:#1B2340;"><tr>
+        <td bgcolor="#1B2340" style="border:none;background-color:#1B2340;padding:26px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:none;background-color:#1B2340;"><tr>
+            <td style="border:none;background-color:#1B2340;">
+              <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:5px;">📅 전체 매체별 업무일정 보기</div>
+              <div style="font-size:12.5px;color:#C7CBD6;">${data.length}개 매체 전체 일정과 상세 비고를 한 화면에서 확인하세요.</div>
+            </td>
+            <td style="border:none;background-color:#1B2340;white-space:nowrap;" align="right" valign="middle">
+              <a href="${FULL_PAGE_URL}" target="_blank" rel="noopener" style="display:inline-block;background-color:#ffffff;color:#1B2340;font-weight:700;font-size:13px;text-decoration:none;padding:11px 20px;border-radius:20px;">전체 일정 열기 →</a>
+            </td>
+          </tr></table>
+        </td>
+      </tr></table>
+      </div>
+    </div>
+  `;
+}
+
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 1800);
+}
+
+document.getElementById('copySubject').addEventListener('click', async ()=>{
+  const text = document.getElementById('subjectText').textContent;
+  try{ await navigator.clipboard.writeText(text); toast('메일 제목이 복사되었습니다'); }
+  catch(e){ alert(text); }
+});
+
+document.getElementById('selectAllBtn').addEventListener('click', ()=>{
+  const area = document.getElementById('emailArea');
+  const range = document.createRange();
+  range.selectNodeContents(area);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  toast('본문 전체가 선택되었습니다 — Ctrl+C(맥은 Cmd+C)로 복사한 뒤 메일에 붙여넣으세요');
+});
+
+async function tryFetchOnce(url){
+  const res = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return await res.text();
+}
+function proxyAttempts(url){
+  const enc = encodeURIComponent(url);
+  return [url, `https://api.allorigins.win/raw?url=${enc}`, `https://corsproxy.io/?url=${enc}`, `https://api.codetabs.com/v1/proxy?quest=${enc}`];
+}
+function rowsFromSheet(csvText){
+  const parsed = Papa.parse(csvText, {header:false, skipEmptyLines:false});
+  const rows = parsed.data;
+  let headerIdx=-1, mediaCol=-1, groupCol=-1, noteCol=-1, firstDateCol=-1, lastDateCol=-1;
+  for(let i=0;i<rows.length;i++){
+    const r = rows[i];
+    const mc = r.findIndex(c=>(c||'').toString().trim()==='매체명');
+    if(mc>=0){ headerIdx=i; mediaCol=mc; groupCol=r.findIndex(c=>(c||'').toString().trim()==='구분'); noteCol=r.findIndex(c=>(c||'').toString().trim()==='비고'); break; }
+  }
+  if(headerIdx<0 || mediaCol<0 || noteCol<0) return [];
+  const dateHeaderRow = rows[headerIdx+1] || [];
+  for(let c=mediaCol+1;c<noteCol;c++){
+    if((dateHeaderRow[c]||'').toString().trim()){ if(firstDateCol<0) firstDateCol=c; lastDateCol=c; }
+  }
+  if(firstDateCol<0) firstDateCol = mediaCol+1;
+  if(lastDateCol<0 || lastDateCol<=firstDateCol) lastDateCol = noteCol-1;
+  const out = [];
+  let lastGroup = '';
+  for(let i=headerIdx+2;i<rows.length;i++){
+    const r = rows[i];
+    const media = (r[mediaCol]||'').toString().trim();
+    if(!media) continue;
+    const g = groupCol>=0 ? (r[groupCol]||'').toString().trim() : '';
+    if(g) lastGroup = g;
+    const d1 = (r[firstDateCol]||'').toString().trim();
+    const d3 = (r[lastDateCol]||'').toString().trim();
+    let d2 = '';
+    for(let c=firstDateCol+1;c<lastDateCol;c++){ const v=(r[c]||'').toString().trim(); if(v){ d2=v; break; } }
+    const note = (r[noteCol]||'').toString().trim();
+    out.push({group: lastGroup || '기타', media, d1, d2: d2||'연휴', d3, note});
+  }
+  return out;
+}
+async function loadData(){
+  for(const url of proxyAttempts(SHEET_URL)){
+    try{
+      const text = await tryFetchOnce(url);
+      const rows = rowsFromSheet(text);
+      if(rows.length){ render(rows); return true; }
+    }catch(e){ continue; }
+  }
+  render(DEFAULT_DATA);
+  return false;
+}
+
+render(DEFAULT_DATA);
+loadData();
+</script>
+</body>
+</html>
