@@ -1,1 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026년 추석 연휴 매체별 업무일정</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Noto+Serif+KR:wght@500;600;700;900&display=swap">
+<style>
+  :root{
+    --night:#1B2340; --night-deep:#12172B;
+    --paper:#F7F4EC; --paper-raised:#FFFFFF;
+    --ink:#2A2A2E; --ink-soft:#5B5B63; --ink-faint:#948F82;
+    --line:#E4DDCB; --line-soft:#ECE6D8;
+    --moon:#E8B44D; --moon-soft:#F7E7C4;
+    --persimmon:#C0503B; --persimmon-soft:#F5DCD4;
+    --pine:#3F7D57; --pine-soft:#E1EFE4;
+    --dusk:#4C6E91; --dusk-soft:#E3EAF1;
+    --gold:#A9791B; --gold-soft:#F1E6C8;
+    --slate:#7C7565; --slate-soft:#EDE8DB;
+    --serif:'Noto Serif KR',serif;
+    --sans:'Nanum Gothic',-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:transparent;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.5;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px;}
 
+  /* ---------- Hero ---------- */
+  .hero{display:flex;align-items:center;gap:28px;padding:40px 0 28px;border-bottom:1px solid var(--line);margin-bottom:28px;flex-wrap:wrap;}
+  .moon{
+    flex:0 0 auto;width:92px;height:92px;border-radius:50%;
+    background:radial-gradient(circle at 34% 30%, #FBEFC9, var(--moon) 60%, #C98F2E 100%);
+    box-shadow:0 0 0 6px rgba(232,180,77,.16), 0 8px 20px rgba(201,143,46,.35);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:var(--night-deep);
+  }
+  .moon .dday-num{font-family:var(--serif);font-weight:900;font-size:22px;line-height:1;}
+  .moon .dday-lbl{font-size:9.5px;font-weight:700;margin-top:2px;letter-spacing:.03em;}
+  .hero-text{flex:1;min-width:260px;}
+  .hero-eyebrow{font-size:12.5px;color:var(--ink-faint);margin-bottom:8px;}
+  .hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(24px,3.4vw,32px);margin:0 0 8px;color:var(--night);letter-spacing:-.01em;}
+  .hero p{font-size:14px;color:var(--ink-soft);margin:0;max-width:600px;}
+  .hero-side{flex:0 0 240px;background:var(--paper-raised);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:12px;align-self:stretch;}
+  .hero-side .row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .src-label{font-weight:700;font-size:12.5px;}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;}
+  .dot.on{background:var(--pine);} .dot.off{background:var(--slate);}
+  .hero-side .meta{color:var(--ink-faint);line-height:1.6;margin-bottom:8px;}
+  .btn{font-family:var(--sans);font-size:11.5px;padding:5px 10px;border-radius:12px;border:1px solid var(--night);background:var(--night);color:#fff;cursor:pointer;}
+  .btn.ghost{background:#fff;color:var(--night);}
+
+  /* ---------- Alerts ---------- */
+  .alert{background:var(--persimmon-soft);border:1px solid #E7BEAF;color:var(--persimmon);border-radius:8px;padding:11px 16px;font-size:13px;font-weight:700;margin-bottom:20px;}
+  .notice{background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--moon);border-radius:0 8px 8px 0;padding:14px 18px;font-size:12.5px;color:var(--ink-soft);line-height:1.85;margin-bottom:32px;}
+  .notice b{color:var(--ink);}
+
+  /* ---------- Urgent strip ---------- */
+  .urgent{margin-bottom:36px;}
+  .urgent h2{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--night);margin:0 0 4px;}
+  .urgent .sub{font-size:12px;color:var(--ink-faint);margin:0 0 14px;}
+  .urgent-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;}
+  .ucard{flex:0 0 220px;background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--persimmon);border-radius:6px;padding:13px 15px;}
+  .ucard .media{font-weight:700;font-size:13.5px;margin-bottom:6px;}
+  .ucard .status{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--persimmon-soft);color:var(--persimmon);margin-bottom:6px;}
+  .ucard .note{font-size:11.5px;color:var(--ink-faint);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+  /* ---------- Controls ---------- */
+  .controls{position:sticky;top:0;background:var(--paper);padding:12px 0 14px;z-index:10;border-bottom:1px solid var(--line);margin-bottom:8px;}
+  .control-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .search{flex:1;min-width:200px;position:relative;}
+  .search input{width:100%;padding:8px 12px 8px 30px;border:1px solid var(--line);border-radius:20px;font-family:var(--sans);font-size:13px;background:#fff;color:var(--ink);}
+  .search input:focus{outline:none;border-color:var(--ink-soft);}
+  .search::before{content:"⌕";position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-faint);font-size:14px;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-size:12px;padding:5px 12px;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;white-space:nowrap;}
+  .count-line{font-size:12px;color:var(--ink-faint);margin:12px 2px 14px;}
+
+  /* ---------- Stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:24px;}
+  .stat{background:var(--paper-raised);padding:14px 16px;}
+  .stat.clickable{cursor:pointer;}
+  .stat.clickable:hover{background:var(--paper);}
+  .stat .num{font-family:var(--serif);font-size:22px;font-weight:800;}
+  .stat .lbl{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+
+  /* ---------- Table ---------- */
+  .group-title{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--night);padding:20px 2px 8px;}
+  table{width:100%;border-collapse:collapse;background:var(--paper-raised);border:1px solid var(--line-soft);}
+  thead th{text-align:left;font-size:11px;color:var(--ink-faint);font-weight:700;padding:9px 10px;border-bottom:1px solid var(--ink);letter-spacing:.02em;white-space:nowrap;}
+  tbody tr{border-bottom:1px solid var(--line-soft);}
+  tbody tr:hover{background:#FFFDF7;}
+  tbody tr.unconfirmed td.col-note{color:#B7B2A6;}
+  tbody tr.unconfirmed td.col-note .note-toggle{color:#B7B2A6;}
+  tbody td{padding:10px;font-size:13px;vertical-align:top;}
+  td.col-media{width:190px;}
+  td.col-status{width:130px;}
+  .status-pill{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;border-radius:6px;padding:6px 8px;line-height:1.25;min-width:78px;text-align:center;}
+  .status-pill .seg-main{font-size:11.5px;font-weight:700;}
+  .status-pill .seg-note{font-size:9.5px;font-weight:500;margin-top:2px;}
+  .status-pill.holiday{background:var(--slate-soft);}
+  .status-pill.holiday .seg-main{font-size:10.5px;font-weight:500;color:var(--ink-faint);}
+  .unconfirmed-tag{display:inline-block;font-size:10px;font-weight:700;color:var(--ink-faint);background:var(--slate-soft);border-radius:8px;padding:1px 7px;margin-left:6px;vertical-align:middle;}
+  td.col-note{color:var(--ink-soft);font-size:12.5px;line-height:1.6;}
+  .note-text{white-space:pre-line;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .note-text.expanded{-webkit-line-clamp:unset;}
+  .note-toggle{font-size:11px;color:var(--dusk);cursor:pointer;font-weight:700;display:inline-block;margin-top:2px;}
+  .empty{padding:40px 10px;text-align:center;color:var(--ink-faint);font-size:13px;}
+
+  .contact{margin-top:36px;background:var(--paper-raised);border:1px solid var(--line);border-radius:8px;padding:16px 18px;font-size:12.5px;color:var(--ink-soft);line-height:1.8;}
+  .contact b{color:var(--ink);}
+  footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-faint);}
+
+  @media(max-width:760px){
+    .stats{grid-template-columns:repeat(3,1fr);}
+    td.col-note{display:none;}
+    thead th:last-child{display:none;}
+    .hero-side{flex:1 1 100%;}
+  }
+  @media(max-width:560px){
+    .wrap{padding:0 16px 60px;}
+    .moon{width:72px;height:72px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="moon"><span class="dday-num" id="ddayNum">D-5</span><span class="dday-lbl">연휴까지</span></div>
+    <div class="hero-text">
+      <div class="hero-eyebrow">미디어전략실 · 사내 공유 · <span id="updatedLabel">업데이트 2026.09.18</span></div>
+      <h1>2026년 추석 연휴 매체별 업무일정</h1>
+      <p>연휴 전후 매체사 근무 일정을 캘린더 형태로 한눈에 확인하세요. 9/23(수) 근무 여부가 가장 중요합니다.</p>
+    </div>
+    <div class="hero-side">
+      <div class="row1"><span class="src-label"><span class="dot off" id="srcDot"></span><span id="srcLabel">기본 데이터 사용 중</span></span></div>
+      <div class="meta" id="srcMeta">구글시트를 연결하면 시트 변경 내용을 그대로 불러옵니다.</div>
+      <button class="btn ghost" id="refreshBtn" style="display:none;">새로고침</button>
+    </div>
+  </div>
+
+  <div class="stats" id="statBar"></div>
+
+  <div class="alert">※ 본 페이지는 사내 네트워크에서만 확인 가능합니다.</div>
+
+  <div class="urgent" id="urgentBlock">
+    <h2>🌕 9/23(수) 쉬는 매체부터 먼저 확인하세요</h2>
+    <p class="sub">연휴 전날 업무가 어려운 매체입니다. 급한 요청은 미리 전달해 주세요.</p>
+    <div class="urgent-scroll" id="urgentScroll"></div>
+  </div>
+
+  <div class="notice">
+    <b>안내 사항</b><br>
+    * 연휴 전날 '정상근무'이더라도 담당자 휴무·마감시간·처리지연 등 이슈가 발생할 수 있으므로, 오전 중 제안·캠페인 세팅 및 업무 요청 바랍니다.<br>
+    * 다음SA, 카카오모먼트, 카카오브랜드검색, 카카오SA, 카카오톡채널 등은 카카오 업무 일정·비고 내용으로 확인 바랍니다.<br>
+    * 별도로 확인하신 미확인·미포함·업데이트 필요 매체의 근무일정이 있다면, 미디어전략팀(최윤미 파트장)에게 메일 및 메신저로 전달 부탁드립니다.
+  </div>
+
+  <div class="controls">
+    <div class="control-row">
+      <div class="chips" id="groupChips"></div>
+      <div class="search"><input type="text" id="searchBox" placeholder="매체명 또는 비고 내용 검색"></div>
+    </div>
+    <div class="control-row" style="margin-top:8px;">
+      <div class="chips" id="statusChips"></div>
+    </div>
+  </div>
+
+  <div class="count-line" id="countLine"></div>
+
+  <div id="results"></div>
+
+  <div class="contact">
+    <b>일정 관련 문의</b><br>
+    목록에 없거나 업데이트가 필요한 매체 근무일정을 알고 계시면 미디어전략팀(최윤미 파트장)에게 메일 또는 메신저로 전달 부탁드립니다.
+  </div>
+
+  <footer>플레이디 미디어전략실 · 연휴 전날 업무는 가급적 오전 중 요청해 주세요.</footer>
+</div>
+
+<script>
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1qy0CDy-NiMFti5Q6rOpddYk37L0duAq_7w0iv5Dj-qk/gviz/tq?tqx=out:csv&gid=418471814';
+const HOLIDAY_START = new Date(2026,8,23); // 9/23
+
+/* ---------------- 기본 데이터 (구글시트 09/18 스냅샷, 연동 실패 시 표시) ---------------- */
+const DEFAULT_DATA = [
+{group:'미디어렙사', media:'나스미디어 (nap dsp 포함)', d1:'단축근무 (오후3시까지)', d2:'연휴', d3:'정상근무', note:'* 9/23(수) 오후 3시 이후 자율퇴근'},
+{group:'미디어렙사', media:'메조미디어 (타겟픽)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'※ 9/23(수) 오전까지 업무 요청 부탁드립니다.'},
+
+{group:'포털', media:'네이버DA', d1:'단축근무 (~12시)', d2:'연휴', d3:'정상근무', note:'[9/23(수) 연휴 전일 업무]\n1. 검수: 검색광고 오후 3시 접수분까지 처리, 성과형/보장형(브랜드검색 포함) 오후 12시 접수분까지 처리\n2. CS/파트너사지원: 오후 5시 접수분까지 처리\n3. 신용카드 검수: 오후 12시 접수분까지 처리'},
+{group:'포털', media:'네이버SA (네이버_그린웹서비스)', d1:'단축근무 (~15시)', d2:'연휴', d3:'정상근무', note:''},
+{group:'포털', media:'네이버 쇼핑광고 (쇼핑블록, 모바일광고)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'1. 대상광고: PC 쇼핑블록(쇼핑/멘즈), 모바일 쇼핑블록(트렌드Pick 등)\n2. 소재검수 미진행 일정 사전 확인 필요\n3. 연휴 기간 내 노출 소재는 사전에 소재검수 등록 요망 (등록 마감 오후 5시)\n4. 소재 교체 필요 시 자동검수 기능 활용 권장. 입찰/구매 광고비 차감은 정상 진행'},
+{group:'포털', media:'카카오', d1:'오전근무 ※담당자별 근무시간 상이', d2:'연휴', d3:'정상근무', note:'* 고객센터/광고심사/문의게시판: 9/23(수) 정상 운영, 9/24~9/25 미운영\n* 일반 소재 심사: 영업일 기준 2일 이내(키워드광고 3일 이내), 휴무일 심사 미진행\n* 성과형 광고(비즈보드·디스플레이·동영상) 심사: 휴무일에도 08:00~24:00 운영\n* 대행사 컨설팅부서: 9/23(수) 오전근무만 진행\n- ASAP·성장지원 등 무상캐시 지급 요청은 9/22(화)까지 권장\n- 기타 요청사항도 가급적 9/22(화)까지 접수 권장'},
+{group:'포털', media:'구글', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'* 광고지원팀: 연휴 기간 채팅/전화 지원 중단, 이메일 접수는 가능하나 처리는 연휴 이후 순차 처리\n* 광고검수팀: 시스템 검수는 정상 운영. 이의신청 필요시 연휴 이후 순차 처리 예상되므로 캠페인 시작일 기준 최소 48시간 전 소재 업로드 권장\n* 연휴 전후 휴가 사용자가 많을 수 있어 여유있게 검수 요청 권장'},
+
+{group:'네트워크DA·버티컬', media:'메타 (페이스북, 인스타그램)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'* 메타 고객센터(문의하기)는 공휴일 상관없이 연중무휴 24시간 운영'},
+{group:'네트워크DA·버티컬', media:'애플 (Apple Ads)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'* 담당자별 개별 휴가 기간이 다르므로 지정담당자 휴무여부 개별 확인 요망'},
+{group:'네트워크DA·버티컬', media:'크리테오', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'모비온', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'RTB하우스', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'몰로코', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'애피어', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'알레프 (X, MS 등)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'OpenAI', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'* 담당자 9/11~9/29 개별 휴가로, 해당 기간 ads-korea@openai.com 또는 ads-support@openai.com 로 문의'},
+{group:'네트워크DA·버티컬', media:'트레이딩웍스 (트레이딩웍스, 애드팝콘)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'* 당일 단축근무로 변동될 수 있음'},
+{group:'네트워크DA·버티컬', media:'모티브인텔리전스 (크로스타겟)', d1:'단축근무 (~12시)', d2:'연휴', d3:'정상근무', note:'미확인(확인필요)'},
+{group:'네트워크DA·버티컬', media:'아티스트컴퍼니 (타겟팅게이츠)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'레인보우8 (ADN)', d1:'단축근무 (~12시)', d2:'연휴', d3:'정상근무', note:'* 23일(수) 전사 오전 근무 시행'},
+{group:'네트워크DA·버티컬', media:'에이스트레이더', d1:'휴무', d2:'연휴', d3:'정상근무', note:'* 9/23(수) NHN 전사 창립기념일 대체 휴무일'},
+{group:'네트워크DA·버티컬', media:'데이블', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'법정 공휴일 기준 휴무 예정'},
+{group:'네트워크DA·버티컬', media:'데이블_웨어즈DSP', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'법정 공휴일 기준 휴무 예정'},
+{group:'네트워크DA·버티컬', media:'타불라', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'NBT (캐시슬라이드, 쿠키오븐 등)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'네이버페이/쿠키오븐 주요 매체사 휴무 일정에 따라 처리 가능 여부 결정\n* 쿠키오븐: 9/23(수) 정상근무\n* 네이버페이 파이낸셜: 9/23(수) 단축근무(당일 12시 접수건까지), 9/28(월) 휴무(창립기념일)\n* 네이버페이 그린웹: 9/23(수) 단축근무(당일 12시 접수내역까지)'},
+{group:'네트워크DA·버티컬', media:'버즈빌', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'12pm까지 소재 및 업무 요청 요망'},
+{group:'네트워크DA·버티컬', media:'EMCG', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'FSN (카울리)', d1:'단축근무 (~15시)', d2:'연휴', d3:'정상근무', note:'* 신규 제안/집행 캠페인 업무 요청: 9/23 오후 1시 이전까지 전달\n(오후 3시 이내 미처리 건은 9/28(월) 순차 진행)'},
+{group:'네트워크DA·버티컬', media:'당근 (전문가모드)', d1:'휴무 (오전까지 소재 검수 권장)', d2:'연휴', d3:'정상근무', note:'[연휴 기간 중 소재 검수 안내]\n연휴 기간에도 소재 검수는 진행(고객센터는 휴무)되나 평소보다 시간이 소요될 수 있음\n연휴 전후 검수 요청 집중 예상 → 1~2일 여유있게 요청 권장\n라이브 필요한 캠페인은 늦어도 9/23(수) 오전까지 검수 접수 요망'},
+{group:'네트워크DA·버티컬', media:'토스애즈 (DA)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'틱톡', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'네이버페이', d1:'단축근무 (~12시)', d2:'연휴', d3:'휴무 (창립기념일)', note:'* 9/23(수) 오전 단축근무: 소재 세팅/검수 필요시 오전 12시 이전까지 전달\n* 9/28(월) 창립기념일 휴무: 리포트/운영/소재 검수·세팅은 그린웹을 통해 지원'},
+{group:'네트워크DA·버티컬', media:'카카오페이', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'연휴 중 라이브 필요시 9/23 소재 승인 및 세팅 완료 건에 한해 라이브 가능'},
+{group:'네트워크DA·버티컬', media:'TNK팩토리 (아이돌챔프, 셀럽챔프, 팬버스, TOSS오늘의포인트미션)', d1:'정상근무 (당일요청건 16시까지)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'디지털캠프', d1:'오전근무 (09:00~13:00)', d2:'연휴', d3:'정상근무', note:'업무 시간 외 요청 건은 다음 영업일 순차 처리, ASAP 건 사전 공유 요망\n팀메일(mkt@digitalcamp.co.kr) 참조 부탁드립니다.'},
+{group:'네트워크DA·버티컬', media:'인크로스', d1:'전사휴무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'텐핑', d1:'단축근무 (~12시)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'우아한형제들 (배달의민족, 배민애즈)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'법정 휴일 외 특이사항 없음'},
+{group:'네트워크DA·버티컬', media:'열품타', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'법정 휴일 외 특이사항 없음'},
+{group:'네트워크DA·버티컬', media:'키즈노트', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'9/23(수) 오전 근무로 단순 문의/제안만 가능\n9/28(월) 주 캠페인 소재 전달 데드라인: 9/21(월) 오후 3시(교체/라이브 동일)'},
+{group:'네트워크DA·버티컬', media:'라이프엑스 (마미톡)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'9/24~9/27 기간, 담당자 1인이 오전/오후 캠페인 모니터링 및 실시간 업무 지원 예정'},
+{group:'네트워크DA·버티컬', media:'바나나몽키즈 (딜링)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'쿠팡애즈 (브랜드애드)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'컬리 (개인화광고)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'코비 (COVI)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'카카오뱅크', d1:'단축근무 (9/22까지 소재등록 요망)', d2:'연휴', d3:'정상근무', note:'9/23 단축근무로 소재 검수 어려울 수 있어 9/22까지 소재 등록 부탁\n일반업종 3영업일 전, 금융업종 5영업일 전 소재 등록 필요'},
+{group:'네트워크DA·버티컬', media:'카카오VX', d1:'정상근무 (오후 단축근무 가능성 有)', d2:'연휴', d3:'정상근무', note:'가능한 9/22(화)까지 소재 전달 부탁 (급건 시 협의 가능)\n박성준 Simon (simon.psj@kakaovx.com), 팀메일(_advx@kakaovx.com, 언더바 포함) 꼭 참조'},
+{group:'네트워크DA·버티컬', media:'골프존', d1:'오전근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'에이아이썸 (Aisum)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'아파트너', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'연휴 중 긴급 건은 김만종 010-9950-8773'},
+{group:'네트워크DA·버티컬', media:'비누랩스 (에브리타임)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'클래스팅', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'레몬트리 (퍼핀)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'닥터다이어리', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'캐시워크', d1:'오전근무 (~오후1시까지)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'인벤', d1:'전사휴무', d2:'연휴', d3:'정상근무', note:'필요업무는 9/22(화) 17시까지 전달\n문의/요청은 메일로, 9/28(월) 순차 처리'},
+{group:'네트워크DA·버티컬', media:'숲 (SOOP)', d1:'단축근무 (~16시)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'스포티비 (SPOTV)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'애드포러스 (바리스타, 그린피, 큐브마인)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'9/23(수) 전사 오전 근무 시행'},
+{group:'네트워크DA·버티컬', media:'스테이션3 (다방)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'직방 (직방, 호갱노노)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'에이블리', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'CJ올리브네트웍스 (CJ ONE)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'CJ ENM (TVING, CJ Youtube, 엠넷플러스 및 디지털광고)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'디시인사이드', d1:'오전근무 (12시업무마감)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'리멤버앤컴퍼니 (리멤버)', d1:'단축근무 (~12시)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'인아웃', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'SK플래닛', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'중고나라', d1:'오전근무', d2:'연휴', d3:'정상근무', note:'9/22 오후 5시 이전 요청 → 9/23 오전 중 처리\n9/22 오후 5시 이후 요청 → 9/28 순차 처리'},
+{group:'네트워크DA·버티컬', media:'팀블라인드 (블라인드)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:'블라인드 광고 소재 검수 시간 11:00~17:00\n팀메일 ads@teamblind.com 참조 부탁드립니다.'},
+{group:'네트워크DA·버티컬', media:'와이즈버즈', d1:'오전근무 (12시업무마감)', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'티맵모빌리티', d1:'권장휴무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'메디게이트', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'이노케어플러스 (닥플)', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'하이퍼테크 (핑거버스)', d1:'오전근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'네트워크DA·버티컬', media:'미디어브릿지컴퍼니', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+
+{group:'CRM', media:'유니드컴즈', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'CRM', media:'데이터라이즈', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'CRM', media:'스냅컴퍼니', d1:'단축근무 (~14:30)', d2:'연휴', d3:'정상근무', note:''},
+
+{group:'DMP', media:'다이티', d1:'정상근무', d2:'연휴', d3:'정상근무', note:''},
+{group:'DMP', media:'로플랫', d1:'정상근무 ※담당자별 근무시간 상이', d2:'연휴', d3:'정상근무 ※담당자별 근무시간 상이', note:'개인별 휴가에 따른 근무일정 상이'},
+{group:'DMP', media:'NICE코어 (NICECORE·나이스평가정보)', d1:'휴무', d2:'연휴', d3:'정상근무', note:'휴무기간 동안 DMP·LMS 등 업무 문의 유선연락 가능 (류지남 팀장 / 010-7457-3902)'},
+];
+
+/* ---------------- helpers ---------------- */
+function escapeHtml(s){
+  return (s==null ? '' : String(s))
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+/* 상태 문구에서 괄호(…) 또는 ※주석을 분리합니다. 본문은 굵게, 주석은 옅은 회색으로 따로 표시하기 위함 */
+function annotate(text){
+  let t = (text||'').trim();
+  let note = '';
+  const pm = /^(.*?)(\([^)]*\))\s*$/.exec(t);
+  if(pm){ t = pm[1].trim(); note = pm[2]; }
+  const idx = t.indexOf('※');
+  if(idx >= 0){ note = (t.slice(idx).trim() + (note ? ' ' + note : '')).trim(); t = t.slice(0, idx).trim(); }
+  return {main: t || '-', note};
+}
+/* 오전근무는 단축근무와 같은 범주로 묶고, 전사휴무/권장휴무도 모두 '휴무'로 묶습니다 (색상/강조용) */
+function categoryOf(text){
+  const t = (text||'').trim();
+  if(t.includes('휴무')) return 'off';
+  if(t.includes('단축') || t.includes('오전')) return 'short';
+  if(t.includes('정상')) return 'normal';
+  if(t.includes('연휴')) return 'holiday';
+  return 'other';
+}
+const CAT_COLOR = {off:'persimmon', short:'gold', normal:'pine', holiday:'slate', other:'slate'};
+
+/* 매체명/비고에 "미확정", "미확인", "확인필요/확인 필요" 문구가 있으면 일정 미확정 매체로 처리합니다.
+   (구글시트 셀의 회색 배경 서식 자체는 CSV로 내려받을 수 없어서, 텍스트 마커로 대신 인식합니다) */
+function isUnconfirmed(d){
+  const hay = `${d.media||''} ${d.note||''}`;
+  return hay.includes('미확정') || hay.includes('미확인') || hay.includes('확인필요') || hay.includes('확인 필요');
+}
+
+let DATA = DEFAULT_DATA.slice();
+let state = {group:'all', status:'all', q:''};
+
+function renderDday(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((HOLIDAY_START - today) / 86400000);
+  const el = document.getElementById('ddayNum');
+  if(diff > 0) el.textContent = 'D-'+diff;
+  else if(diff === 0) el.textContent = 'D-DAY';
+  else el.textContent = '연휴중';
+}
+
+function renderStats(){
+  const total = DATA.length;
+  const count = (cat)=> DATA.filter(d=>categoryOf(d.d1)===cat).length;
+  document.getElementById('statBar').innerHTML = `
+    <div class="stat"><div class="num">${total}</div><div class="lbl">전체 매체</div></div>
+    <div class="stat clickable" data-stat="short"><div class="num">${count('short')}</div><div class="lbl">단축근무</div></div>
+    <div class="stat clickable" data-stat="off"><div class="num">${count('off')}</div><div class="lbl">휴무</div></div>
+  `;
+  document.querySelectorAll('.stat.clickable').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      state.status = state.status === el.dataset.stat ? 'all' : el.dataset.stat;
+      renderAll();
+    });
+  });
+}
+
+function renderUrgent(){
+  const urgent = DATA.filter(d=> categoryOf(d.d1) === 'off');
+  const block = document.getElementById('urgentBlock');
+  if(urgent.length===0){ block.style.display='none'; return; }
+  block.style.display='';
+  document.getElementById('urgentScroll').innerHTML = urgent.map(d=>{
+    const {main:mediaMain, note:mediaNote} = annotate(d.media);
+    const {main:statusMain} = annotate(d.d1);
+    return `
+    <div class="ucard">
+      <div class="media">${escapeHtml(mediaMain)}${mediaNote?` <span style="font-weight:400;color:var(--ink-faint);">${escapeHtml(mediaNote)}</span>`:''}</div>
+      <span class="status">${escapeHtml(statusMain)}</span>
+      <div class="note">${escapeHtml(d.note||'별도 비고 없음')}</div>
+    </div>
+  `;
+  }).join('');
+}
+
+function renderChips(){
+  const groups = Array.from(new Set(DATA.map(d=>d.group)));
+  const grow = document.getElementById('groupChips');
+  grow.innerHTML = ['all',...groups].map(g=>`<button class="chip" data-g="${escapeHtml(g)}" style="${state.group===g?'background:var(--night);color:#fff;border-color:var(--night);':''}">${g==='all'?'전체 구분':escapeHtml(g)}</button>`).join('');
+  grow.querySelectorAll('.chip').forEach(btn=>btn.addEventListener('click',()=>{ state.group = btn.dataset.g; renderAll(); }));
+
+  const CAT_LABEL = {short:'단축근무', normal:'정상근무', off:'휴무'};
+  const catOrder = ['short','off'].filter(c => DATA.some(d => categoryOf(d.d1)===c || categoryOf(d.d3)===c));
+  const srow = document.getElementById('statusChips');
+  srow.innerHTML = ['all',...catOrder].map(s=>{
+    const c = s==='all' ? null : CAT_COLOR[s];
+    const isActive = state.status===s;
+    const activeStyle = isActive ? (s==='all' ? 'background:var(--night);color:#fff;border-color:var(--night);' : `background:var(--${c}-soft);color:var(--${c});border-color:var(--${c});`) : '';
+    return `<button class="chip" data-s="${s}" style="${activeStyle}">${s==='all'?'전체 근무형태':CAT_LABEL[s]}</button>`;
+  }).join('');
+  srow.querySelectorAll('.chip').forEach(btn=>btn.addEventListener('click',()=>{ state.status = btn.dataset.s; renderAll(); }));
+}
+
+function matches(d){
+  if(state.group!=='all' && d.group!==state.group) return false;
+  if(state.status!=='all' && categoryOf(d.d1)!==state.status && categoryOf(d.d3)!==state.status) return false;
+  if(state.q){
+    const q = state.q.toLowerCase();
+    if(!(d.media.toLowerCase().includes(q) || (d.note||'').toLowerCase().includes(q))) return false;
+  }
+  return true;
+}
+
+function statusPillHtml(text, isHoliday){
+  const {main, note} = annotate(text);
+  const cat = isHoliday ? 'holiday' : categoryOf(text);
+  const color = CAT_COLOR[cat];
+  const emphasize = !isHoliday && (cat==='off' || cat==='short');
+  const style = isHoliday
+    ? ''
+    : emphasize
+      ? `background:var(--${color});color:#fff;`
+      : `background:var(--${color}-soft);color:var(--${color});`;
+  const noteColor = isHoliday ? 'var(--ink-faint)' : (emphasize ? 'rgba(255,255,255,.82)' : 'var(--ink-faint)');
+  const noteHtml = note ? `<span class="seg-note" style="color:${noteColor};">${escapeHtml(note)}</span>` : '';
+  return `<span class="status-pill ${isHoliday?'holiday':''}" style="${style}">
+    <span class="seg-main">${escapeHtml(main)}</span>${noteHtml}
+  </span>`;
+}
+function mediaHtml(d){
+  const {main, note} = annotate(d.media);
+  const tag = isUnconfirmed(d) ? `<span class="unconfirmed-tag">미확인</span>` : '';
+  return `<span style="font-weight:700;color:${isUnconfirmed(d)?'#B7B2A6':'var(--ink)'};">${escapeHtml(main)}</span>${note?`<br><span style="font-weight:400;color:${isUnconfirmed(d)?'#C7C2B6':'var(--ink-faint)'};font-size:12px;">${escapeHtml(note)}</span>`:''}${tag}`;
+}
+
+let noteIdCounter = 0;
+function rowHtml(d){
+  const nid = 'note'+(noteIdCounter++);
+  const hasNote = (d.note||'').trim().length > 0;
+  return `
+    <tr class="${isUnconfirmed(d)?'unconfirmed':''}">
+      <td class="col-media">${mediaHtml(d)}</td>
+      <td class="col-status">${statusPillHtml(d.d1, false)}</td>
+      <td class="col-status">${statusPillHtml(d.d2 || '연휴', true)}</td>
+      <td class="col-status">${statusPillHtml(d.d3, false)}</td>
+      <td class="col-note">
+        ${hasNote ? `<div class="note-text" id="${nid}">${escapeHtml(d.note)}</div><span class="note-toggle" onclick="toggleNote('${nid}', this)">더보기</span>` : '<span style="color:var(--line);">–</span>'}
+      </td>
+    </tr>`;
+}
+function toggleNote(id, el){
+  const node = document.getElementById(id);
+  const expanded = node.classList.toggle('expanded');
+  el.textContent = expanded ? '접기' : '더보기';
+}
+
+function renderResults(){
+  const filtered = DATA.filter(matches);
+  document.getElementById('countLine').textContent = `${filtered.length}개 매체가 조회되었습니다.`;
+  const container = document.getElementById('results');
+  if(filtered.length===0){
+    container.innerHTML = `<div class="empty">조건에 맞는 매체가 없습니다.</div>`;
+    return;
+  }
+  const tableHead = `<thead><tr><th>매체명</th><th>9/23 (수)</th><th>9/24~27 (연휴)</th><th>9/28 (월)</th><th>비고</th></tr></thead>`;
+  const groupOrder = state.group==='all' ? Array.from(new Set(DATA.map(d=>d.group))) : [state.group];
+  const groups = groupOrder.map(g=>({title:g, rows:filtered.filter(d=>d.group===g)})).filter(g=>g.rows.length);
+  container.innerHTML = groups.map(g=>`
+    <div class="group-title">${escapeHtml(g.title)} (${g.rows.length})</div>
+    <table>${tableHead}<tbody>${g.rows.map(rowHtml).join('')}</tbody></table>
+  `).join('');
+}
+
+function renderAll(){ renderStats(); renderChips(); renderResults(); }
+
+document.getElementById('searchBox').addEventListener('input', e=>{ state.q = e.target.value.trim(); renderResults(); });
+
+/* ---------------- Google Sheet sync ---------------- */
+function setSourceUI(st, meta){
+  const dot = document.getElementById('srcDot');
+  const label = document.getElementById('srcLabel');
+  if(st === true){ dot.className='dot on'; label.textContent='구글시트 연동됨'; }
+  else if(st === 'error'){ dot.className='dot off'; dot.style.background='#C0503B'; label.textContent='연동 실패 · 기본 데이터 표시 중'; }
+  else { dot.className='dot off'; dot.style.background=''; label.textContent='기본 데이터 사용 중'; }
+  document.getElementById('srcMeta').textContent = meta || (st ? '' : '구글시트를 연결하면 시트 변경 내용을 그대로 불러옵니다.');
+  document.getElementById('refreshBtn').style.display = st ? '' : 'none';
+}
+
+async function tryFetchOnce(url){
+  const res = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return await res.text();
+}
+function proxyAttempts(url){
+  const enc = encodeURIComponent(url);
+  return [url, `https://api.allorigins.win/raw?url=${enc}`, `https://corsproxy.io/?url=${enc}`, `https://api.codetabs.com/v1/proxy?quest=${enc}`];
+}
+
+function rowsFromSheet(csvText){
+  const parsed = Papa.parse(csvText, {header:false, skipEmptyLines:false});
+  const rows = parsed.data;
+  let headerIdx=-1, mediaCol=-1, groupCol=-1, noteCol=-1, firstDateCol=-1, lastDateCol=-1;
+  for(let i=0;i<rows.length;i++){
+    const r = rows[i];
+    const mc = r.findIndex(c=>(c||'').toString().trim()==='매체명');
+    if(mc>=0){ headerIdx=i; mediaCol=mc; groupCol=r.findIndex(c=>(c||'').toString().trim()==='구분'); noteCol=r.findIndex(c=>(c||'').toString().trim()==='비고'); break; }
+  }
+  if(headerIdx<0 || mediaCol<0 || noteCol<0) return [];
+  const dateHeaderRow = rows[headerIdx+1] || [];
+  for(let c=mediaCol+1;c<noteCol;c++){
+    if((dateHeaderRow[c]||'').toString().trim()){ if(firstDateCol<0) firstDateCol=c; lastDateCol=c; }
+  }
+  if(firstDateCol<0) firstDateCol = mediaCol+1;
+  if(lastDateCol<0 || lastDateCol<=firstDateCol) lastDateCol = noteCol-1;
+
+  const out = [];
+  let lastGroup = '';
+  for(let i=headerIdx+2;i<rows.length;i++){
+    const r = rows[i];
+    const media = (r[mediaCol]||'').toString().trim();
+    if(!media) continue;
+    const g = groupCol>=0 ? (r[groupCol]||'').toString().trim() : '';
+    if(g) lastGroup = g;
+    const d1 = (r[firstDateCol]||'').toString().trim();
+    const d3 = (r[lastDateCol]||'').toString().trim();
+    let d2 = '';
+    for(let c=firstDateCol+1;c<lastDateCol;c++){ const v=(r[c]||'').toString().trim(); if(v){ d2=v; break; } }
+    const note = (r[noteCol]||'').toString().trim();
+    out.push({group: lastGroup || '기타', media, d1, d2: d2||'연휴', d3, note});
+  }
+  return out;
+}
+
+async function loadData(){
+  for(const url of proxyAttempts(SHEET_URL)){
+    try{
+      const text = await tryFetchOnce(url);
+      const rows = rowsFromSheet(text);
+      if(rows.length){
+        DATA = rows;
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+        setSourceUI(true, `연결됨 · ${rows.length}건 · 마지막 동기화 ${timeStr}`);
+        document.getElementById('updatedLabel').textContent = `업데이트 ${now.getFullYear()}.${(now.getMonth()+1).toString().padStart(2,'0')}.${now.getDate().toString().padStart(2,'0')}`;
+        renderDday(); renderUrgent(); renderAll();
+        return true;
+      }
+    }catch(e){ continue; }
+  }
+  setSourceUI('error', '연동 실패 · 새로고침을 눌러 다시 시도해 주세요');
+  return false;
+}
+
+document.getElementById('refreshBtn').addEventListener('click', ()=> loadData());
+
+(async function init(){
+  renderDday(); renderUrgent(); renderAll();
+  await loadData();
+})();
+</script>
+</body>
+</html>
